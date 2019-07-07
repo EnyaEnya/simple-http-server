@@ -54,7 +54,7 @@ public class HttpServer {
         private void writeResponse() throws Throwable {
             File file = new File(url);
             String result = "HTTP/1.1 200 OK\r\n" +
-                    "Server: YarServer/2009-09-09\r\n" +
+                    "Server: EnyaServer\r\n" +
                     "Content-Type: application/octet-stream\r\n" + //todo guess content type java
                     "Content-Length: " + file.length() + "\r\n" +
                     "Connection: close\r\n\r\n";
