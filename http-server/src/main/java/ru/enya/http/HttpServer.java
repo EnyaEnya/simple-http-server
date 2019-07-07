@@ -1,5 +1,8 @@
 package ru.enya.http;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,11 +10,13 @@ import java.nio.file.Files;
 
 public class HttpServer {
 
+    private final static Logger log = LoggerFactory.getLogger(HttpServer.class);
+
     public static void main(String[] args) throws Throwable {
         ServerSocket ss = new ServerSocket(8080);
         while (true) {
             Socket s = ss.accept();
-            System.err.println("Client accepted");
+            log.info("Client accepted, IP-address: {}", s.getInetAddress());
             //todo use thread pool
             new Thread(new SocketProcessor(s)).start();
         }
@@ -43,7 +48,7 @@ public class HttpServer {
                     /*do nothing*/
                 }
             }
-            System.err.println("Client processing finished");
+            log.info("Client processing finished, IP-address: {}", s.getInetAddress());
         }
 
         private void writeResponse() throws Throwable {
