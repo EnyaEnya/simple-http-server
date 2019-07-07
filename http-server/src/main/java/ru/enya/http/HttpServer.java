@@ -53,9 +53,14 @@ public class HttpServer {
 
         private void writeResponse() throws Throwable {
             File file = new File(url);
+            //todo encoding
+            String mimeType = Files.probeContentType(file.toPath());
+            if (mimeType == null) {
+                mimeType = "application/octet-stream";
+            }
             String result = "HTTP/1.1 200 OK\r\n" +
                     "Server: EnyaServer\r\n" +
-                    "Content-Type: application/octet-stream\r\n" + //todo guess content type java
+                    "Content-Type: " + mimeType + "\r\n" +
                     "Content-Length: " + file.length() + "\r\n" +
                     "Connection: close\r\n\r\n";
             os.write(result.getBytes());
