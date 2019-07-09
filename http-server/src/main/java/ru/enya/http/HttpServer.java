@@ -7,6 +7,8 @@ import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.file.Files;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HttpServer {
 
@@ -14,11 +16,11 @@ public class HttpServer {
 
     public static void main(String[] args) throws Throwable {
         ServerSocket ss = new ServerSocket(8080);
+        ExecutorService threadPool = Executors.newFixedThreadPool(8);
         while (true) {
             Socket s = ss.accept();
             log.info("Client accepted, IP-address: {}", s.getInetAddress());
-            //todo use thread pool
-            new Thread(new SocketProcessor(s)).start();
+            threadPool.execute(new SocketProcessor(s));
         }
     }
 
@@ -58,6 +60,8 @@ public class HttpServer {
             if (mimeType == null) {
                 mimeType = "application/octet-stream";
             }
+            //todo add answer "404 not found"
+            //todo add answer "error"
             String result = "HTTP/1.1 200 OK\r\n" +
                     "Server: EnyaServer\r\n" +
                     "Content-Type: " + mimeType + "\r\n" +
@@ -77,6 +81,7 @@ public class HttpServer {
                 if(s == null || s.trim().length() == 0)  {
                     break;
                 }
+                //todo add http HEAD
                 if (s.startsWith("GET /")) {
                     url = s.split(" ")[1];
                 }
