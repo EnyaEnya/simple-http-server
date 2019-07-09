@@ -10,6 +10,8 @@ import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import static ru.enya.http.Method.HEAD;
+
 public class HttpServer {
 
     private final static Logger log = LoggerFactory.getLogger(HttpServer.class);
@@ -26,7 +28,7 @@ public class HttpServer {
 
     private static class SocketProcessor implements Runnable {
 
-        private String url;
+        private HttpRequest httpRequest;
         private Socket s;
         private InputStream is;
         private OutputStream os;
@@ -54,8 +56,8 @@ public class HttpServer {
         }
 
         private void writeResponse() throws Throwable {
-            File file = new File(url);
-            //todo encoding
+            File file = new File(httpRequest.getRequestURI());
+            //todo encoding(understand cyrillic symbols)
             String mimeType = Files.probeContentType(file.toPath());
             if (mimeType == null) {
                 mimeType = "application/octet-stream";
@@ -69,16 +71,18 @@ public class HttpServer {
                     "Connection: close\r\n\r\n";
             os.write(result.getBytes());
             os.flush();
-            byte[] buffer = new byte[1024];
-            try (FileInputStream fileInputStream = new FileInputStream(file)) {
-                while (true) {
-                    int bytesRead = fileInputStream.read(buffer);
-                    if (bytesRead < 0)
-                        break;
-                    os.write(buffer, 0, bytesRead);
+            if (httpRequest.getMethod() != HEAD) {
+                byte[] buffer = new byte[1024];
+                try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                    while (true) {
+                        int bytesRead = fileInputStream.read(buffer);
+                        if (bytesRead < 0)
+                            break;
+                        os.write(buffer, 0, bytesRead);
+                    }
                 }
+                os.flush();
             }
-            os.flush();
         }
 
         private void readInputHeaders() throws Throwable {
@@ -89,8 +93,9 @@ public class HttpServer {
                     break;
                 }
                 //todo add http HEAD
-                if (s.startsWith("GET /")) {
-                    url = s.split(" ")[1];
+                if (httpRequest == null && s.endsWith("HTTP/1.1")) {
+                    String[] httpString = s.split(" ");
+                    httpRequest = new HttpRequest(Method.valueOf(httpString[0]), httpString[1]);
                 }
             }
         }
