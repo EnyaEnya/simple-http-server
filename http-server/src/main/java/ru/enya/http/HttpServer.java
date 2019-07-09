@@ -95,7 +95,7 @@ public class HttpServer {
                 //todo add http HEAD
                 if (httpRequest == null && s.endsWith("HTTP/1.1")) {
                     String[] httpString = s.split(" ");
-                    httpRequest = new HttpRequest(Method.valueOf(httpString[0]), httpString[1]);
+                    httpRequest = new HttpRequestImpl(Method.valueOf(httpString[0]), httpString[1], is);
                 }
             }
         }

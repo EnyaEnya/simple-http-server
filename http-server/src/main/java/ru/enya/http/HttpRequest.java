@@ -1,21 +1,20 @@
 package ru.enya.http;
 
-public class HttpRequest {
+import java.io.InputStream;
+import java.util.Collection;
+import java.util.List;
 
-    private final Method method;
-    private final String requestURI;
+public interface HttpRequest {
 
+    Method getMethod();
 
-    public HttpRequest(Method method, String requestURI) {
-        this.method = method;
-        this.requestURI = requestURI;
-    }
+    String getRequestURI();
 
-    public Method getMethod() {
-        return method;
-    }
+    String getHeader(String name);
 
-    public String getRequestURI() {
-        return requestURI;
-    }
+    List<String> getHeaders(String name); //for example cookie values
+
+    InputStream getInputStream();
+
+    Collection<String> getHeaderNames(); //keys
 }
