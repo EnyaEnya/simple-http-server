@@ -42,7 +42,7 @@ public class HttpServer {
                 readInputHeaders();
                 writeResponse();
             } catch (Throwable t) {
-                /*do nothing*/
+                log.error("Error", t);
             } finally {
                 try {
                     s.close();
@@ -69,8 +69,15 @@ public class HttpServer {
                     "Connection: close\r\n\r\n";
             os.write(result.getBytes());
             os.flush();
-            //todo write big file to outputstream java
-            os.write(Files.readAllBytes(file.toPath()));
+            byte[] buffer = new byte[1024];
+            try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                while (true) {
+                    int bytesRead = fileInputStream.read(buffer);
+                    if (bytesRead < 0)
+                        break;
+                    os.write(buffer, 0, bytesRead);
+                }
+            }
             os.flush();
         }
 
