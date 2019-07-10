@@ -1,6 +1,8 @@
 package ru.enya.http;
 
+import java.io.BufferedReader;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -8,18 +10,17 @@ import java.util.Map;
 
 public class HttpRequestImpl implements HttpRequest {
 
-    private final Method method;
-    private final String requestURI;
+    private Method method;
+    private String requestURI;
     private final InputStream inputStream;
 
     private Map<String, List<String>> headers;
 
 
-    public HttpRequestImpl(Method method, String requestURI, InputStream inputStream) {
-        this.method = method;
-        this.requestURI = requestURI;
+    public HttpRequestImpl(InputStream inputStream) throws Throwable {
         this.inputStream = inputStream;
         this.headers = new HashMap<>();
+        readInputHeaders();
     }
 
     @Override
@@ -51,4 +52,22 @@ public class HttpRequestImpl implements HttpRequest {
     public Collection<String> getHeaderNames() {
         return headers.keySet();
     }
+
+
+    private void readInputHeaders() throws Throwable {
+        BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream));
+        while(true) {
+            String s = br.readLine();
+            if(s == null || s.trim().length() == 0)  {
+                break;
+            }
+            if (method == null && s.endsWith("HTTP/1.1")) {
+                String[] httpString = s.split(" ");
+                method = Method.valueOf(httpString[0]);
+                requestURI = httpString[1];
+            }
+        }
+    }
+
 }
+

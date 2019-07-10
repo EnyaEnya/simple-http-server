@@ -37,11 +37,11 @@ public class HttpServer {
             this.s = s;
             this.is = s.getInputStream();
             this.os = s.getOutputStream();
+            this.httpRequest = new HttpRequestImpl(is);
         }
 
         public void run() {
             try {
-                readInputHeaders();
                 writeResponse();
             } catch (Throwable t) {
                 log.error("Error", t);
@@ -82,21 +82,6 @@ public class HttpServer {
                     }
                 }
                 os.flush();
-            }
-        }
-
-        private void readInputHeaders() throws Throwable {
-            BufferedReader br = new BufferedReader(new InputStreamReader(is));
-            while(true) {
-                String s = br.readLine();
-                if(s == null || s.trim().length() == 0)  {
-                    break;
-                }
-                //todo add http HEAD
-                if (httpRequest == null && s.endsWith("HTTP/1.1")) {
-                    String[] httpString = s.split(" ");
-                    httpRequest = new HttpRequestImpl(Method.valueOf(httpString[0]), httpString[1], is);
-                }
             }
         }
     }
