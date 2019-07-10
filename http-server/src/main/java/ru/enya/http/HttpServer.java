@@ -60,29 +60,34 @@ public class HttpServer {
         private void writeResponse() throws Throwable {
             File file = new File(httpRequest.getRequestURI());
             //todo encoding(understand cyrillic symbols)
-            String mimeType = Files.probeContentType(file.toPath());
-            if (mimeType == null) {
-                mimeType = "application/octet-stream";
-            }
-            //todo add answer "404 not found"
-            //todo add answer "error"
-            httpResponse.setCode(HttpStatusCode.OK);
-            httpResponse.addHeader("Server", "EnyaServer");
-            httpResponse.addHeader("Content-Type", mimeType);
-            httpResponse.addHeader("Content-Length", Long.toString(file.length()));
-            httpResponse.addHeader("Connection", "close");
-            httpResponse.writeHeaders();
-            if (httpRequest.getMethod() != HEAD) {
-                byte[] buffer = new byte[1024];
-                try (FileInputStream fileInputStream = new FileInputStream(file)) {
-                    while (true) {
-                        int bytesRead = fileInputStream.read(buffer);
-                        if (bytesRead < 0)
-                            break;
-                        os.write(buffer, 0, bytesRead);
-                    }
+            if (file.exists()) {
+                String mimeType = Files.probeContentType(file.toPath());
+                if (mimeType == null) {
+                    mimeType = "application/octet-stream";
                 }
-                os.flush();
+                httpResponse.setCode(HttpStatusCode.OK);
+                httpResponse.addHeader("Server", "EnyaServer");
+                httpResponse.addHeader("Content-Type", mimeType);
+                httpResponse.addHeader("Content-Length", Long.toString(file.length()));
+                httpResponse.addHeader("Connection", "close");
+                httpResponse.writeHeaders();
+                if (httpRequest.getMethod() != HEAD) {
+                    byte[] buffer = new byte[1024];
+                    try (FileInputStream fileInputStream = new FileInputStream(file)) {
+                        while (true) {
+                            int bytesRead = fileInputStream.read(buffer);
+                            if (bytesRead < 0)
+                                break;
+                            os.write(buffer, 0, bytesRead);
+                        }
+                    }
+                    os.flush();
+                }
+            } else {
+                httpResponse.setCode(HttpStatusCode.NOT_FOUND);
+                httpResponse.addHeader("Server", "EnyaServer");
+                httpResponse.addHeader("Connection", "close");
+                httpResponse.writeHeaders();
             }
         }
     }
