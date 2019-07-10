@@ -3,10 +3,7 @@ package ru.enya.http;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HttpRequestImpl implements HttpRequest {
 
@@ -53,6 +50,16 @@ public class HttpRequestImpl implements HttpRequest {
         return headers.keySet();
     }
 
+    private void addHeader(String name, String value) {
+        if (headers.containsKey(name)) {
+            headers.get(name).add(value);
+        } else {
+            List<String> values = new ArrayList<>();
+            values.add(value);
+            headers.put(name, values);
+        }
+    }
+
 
     private void readInputHeaders() throws Throwable {
         BufferedReader br = new BufferedReader(new InputStreamReader(this.inputStream));
@@ -65,6 +72,9 @@ public class HttpRequestImpl implements HttpRequest {
                 String[] httpString = s.split(" ");
                 method = Method.valueOf(httpString[0]);
                 requestURI = httpString[1];
+            } else {
+                String[] headers = s.split(": ");
+                addHeader(headers[0], headers[1]);
             }
         }
     }
