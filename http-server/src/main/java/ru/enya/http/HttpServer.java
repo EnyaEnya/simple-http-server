@@ -32,12 +32,14 @@ public class HttpServer {
         private Socket s;
         private InputStream is;
         private OutputStream os;
+        private HttpResponse httpResponse;
 
         private SocketProcessor(Socket s) throws Throwable {
             this.s = s;
             this.is = s.getInputStream();
             this.os = s.getOutputStream();
             this.httpRequest = new HttpRequestImpl(is);
+            this.httpResponse = new HttpResponseImpl(os);
         }
 
         public void run() {
@@ -64,13 +66,12 @@ public class HttpServer {
             }
             //todo add answer "404 not found"
             //todo add answer "error"
-            String result = "HTTP/1.1 200 OK\r\n" +
-                    "Server: EnyaServer\r\n" +
-                    "Content-Type: " + mimeType + "\r\n" +
-                    "Content-Length: " + file.length() + "\r\n" +
-                    "Connection: close\r\n\r\n";
-            os.write(result.getBytes());
-            os.flush();
+            httpResponse.setCode(HttpStatusCode.OK);
+            httpResponse.addHeader("Server", "EnyaServer");
+            httpResponse.addHeader("Content-Type", mimeType);
+            httpResponse.addHeader("Content-Length", Long.toString(file.length()));
+            httpResponse.addHeader("Connection", "close");
+            httpResponse.writeHeaders();
             if (httpRequest.getMethod() != HEAD) {
                 byte[] buffer = new byte[1024];
                 try (FileInputStream fileInputStream = new FileInputStream(file)) {

@@ -1,10 +1,8 @@
 package ru.enya.http;
 
+import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HttpResponseImpl implements HttpResponse {
 
@@ -38,4 +36,18 @@ public class HttpResponseImpl implements HttpResponse {
     public OutputStream getOutputStream() {
         return outputStream;
     }
+
+    @Override
+    public void writeHeaders() throws IOException {
+        String resultString = "";
+        resultString += "HTTP/1.1 " + code.getCode() + " " + code.getDescription() + "\r\n";
+        Set<Map.Entry<String, List<String>>> set = headers.entrySet();
+        for (Map.Entry<String, List<String>> entry: set) {
+            resultString += entry.getKey() + ": " + entry.getValue().get(0) + "\r\n";
+        }
+        resultString += "\r\n";
+        outputStream.write(resultString.getBytes());
+        outputStream.flush();
+    }
+
 }
