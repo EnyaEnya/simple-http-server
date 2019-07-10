@@ -57,6 +57,17 @@ public class HttpServer {
             log.info("Client processing finished, IP-address: {}", s.getInetAddress());
         }
 
+        private String errorBody(HttpStatusCode httpStatusCode) {
+            return "<html>" +
+                    "<head><title>"+ httpStatusCode.getCode() +" The plain HTTP request was sent to HTTPS port</title></head>" +
+                    "<body bgcolor=\"white\"> <center><h1>"
+                    + httpStatusCode.getCode() + " " + httpStatusCode.getDescription()
+                    + "</h1></center>" +
+                    "<center>The URL you requested was not found. </center>" +
+                    "<hr><center>EnyaServer</center> </body>" +
+                    "</html>";
+        }
+
         private void writeResponse() throws Throwable {
             File file = new File(httpRequest.getRequestURI());
             //todo encoding(understand cyrillic symbols)
@@ -88,6 +99,7 @@ public class HttpServer {
                 httpResponse.addHeader("Server", "EnyaServer");
                 httpResponse.addHeader("Connection", "close");
                 httpResponse.writeHeaders();
+                httpResponse.getOutputStream().write(errorBody(HttpStatusCode.NOT_FOUND).getBytes());
             }
         }
     }
