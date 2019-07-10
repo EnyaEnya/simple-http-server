@@ -59,7 +59,7 @@ public class HttpServer {
 
         private String errorBody(HttpStatusCode httpStatusCode) {
             return "<html>" +
-                    "<head><title>"+ httpStatusCode.getCode() +" The plain HTTP request was sent to HTTPS port</title></head>" +
+                    "<head><title>"+ httpStatusCode.getCode() +" The URL you requested was not found.</title></head>" +
                     "<body bgcolor=\"white\"> <center><h1>"
                     + httpStatusCode.getCode() + " " + httpStatusCode.getDescription()
                     + "</h1></center>" +
