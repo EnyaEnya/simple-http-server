@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -72,8 +73,7 @@ public class HttpServer {
 
         private void writeResponse() throws Throwable {
 
-            File file = new File(parsePath(httpRequest.getRequestURI()));
-            //todo encoding(understand cyrillic symbols)
+            File file = new File(parsePath(URLDecoder.decode(httpRequest.getRequestURI(), "UTF-8")));
             if (file.exists()) {
                 String mimeType = Files.probeContentType(file.toPath());
                 if (mimeType == null) {
@@ -111,7 +111,7 @@ public class HttpServer {
             if ("/".equals(requestPath)) {
                 resultPath += settings.getFile();
             } else {
-                resultPath += httpRequest.getRequestURI();
+                resultPath += requestPath;
             }
             return resultPath;
         }
