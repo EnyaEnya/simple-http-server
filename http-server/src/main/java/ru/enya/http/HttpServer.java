@@ -38,12 +38,12 @@ public class HttpServer {
             this.s = s;
             this.is = s.getInputStream();
             this.os = s.getOutputStream();
-            this.httpRequest = new HttpRequestImpl(is);
-            this.httpResponse = new HttpResponseImpl(os);
         }
 
         public void run() {
             try {
+                this.httpRequest = new HttpRequestImpl(is);
+                this.httpResponse = new HttpResponseImpl(os);
                 writeResponse();
             } catch (Throwable t) {
                 log.error("Error", t);
