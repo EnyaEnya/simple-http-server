@@ -15,9 +15,10 @@ import static ru.enya.http.Method.HEAD;
 public class HttpServer {
 
     private final static Logger log = LoggerFactory.getLogger(HttpServer.class);
+    public static Settings settings;
 
     public static void main(String[] args) throws Throwable {
-        Settings settings = new Settings(args);
+        settings = new Settings(args);
         ServerSocket ss = new ServerSocket(settings.getPort());
         ExecutorService threadPool = Executors.newFixedThreadPool(settings.getThreads());
         while (true) {
@@ -70,7 +71,8 @@ public class HttpServer {
         }
 
         private void writeResponse() throws Throwable {
-            File file = new File(httpRequest.getRequestURI());
+
+            File file = new File(parsePath(httpRequest.getRequestURI()));
             //todo encoding(understand cyrillic symbols)
             if (file.exists()) {
                 String mimeType = Files.probeContentType(file.toPath());
@@ -103,5 +105,16 @@ public class HttpServer {
                 httpResponse.getOutputStream().write(errorBody(HttpStatusCode.NOT_FOUND).getBytes());
             }
         }
+
+        private String parsePath (String requestPath) {
+            String resultPath = settings.getDir();
+            if ("/".equals(requestPath)) {
+                resultPath += settings.getFile();
+            } else {
+                resultPath += httpRequest.getRequestURI();
+            }
+            return resultPath;
+        }
+
     }
 }
