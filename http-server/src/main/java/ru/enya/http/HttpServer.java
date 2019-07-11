@@ -17,8 +17,9 @@ public class HttpServer {
     private final static Logger log = LoggerFactory.getLogger(HttpServer.class);
 
     public static void main(String[] args) throws Throwable {
-        ServerSocket ss = new ServerSocket(8080);
-        ExecutorService threadPool = Executors.newFixedThreadPool(8);
+        Settings settings = new Settings(args);
+        ServerSocket ss = new ServerSocket(settings.getPort());
+        ExecutorService threadPool = Executors.newFixedThreadPool(settings.getThreads());
         while (true) {
             Socket s = ss.accept();
             log.info("Client accepted, IP-address: {}", s.getInetAddress());
